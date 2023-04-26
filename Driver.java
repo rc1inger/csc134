@@ -288,6 +288,11 @@ class Driver {
         }
 
         System.out.println();
+        
+        try {
+            st.executeQuery("drop table ling_team cascade constraints");
+            st.executeQuery("drop table ling_player cascade constraints");
+        } catch (SQLException s) {}
 
     } // end main
     
