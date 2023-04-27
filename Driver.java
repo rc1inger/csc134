@@ -77,8 +77,7 @@ class Driver {
         }
         // newline and clear buffer
         System.out.println("\n");
-        rs.close();
-        st.close();
+        Scanner scanner = new Scanner(System.in);
     }
     
     // Drop tables
@@ -89,15 +88,18 @@ class Driver {
         st.executeQuery("drop table ling_team cascade constraints");
     }
     
+    // Show Players
     public static void showPlayers(Connection con) throws Exception
     {
         Statement st = con.createStatement();
         st.executeQuery("select * from ling_player");
     }
+    
+    // Show Team
    public static void showTeams(Connection con) throws Exception
     {
         Statement st = con.createStatement();
-        ResultSet rs = st.executeQuery("select * from ling_team");
+        ResultSet rs = st.executeQuery("select * from user_tables");
         
         System.out.println("This is not working");
     }
