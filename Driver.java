@@ -49,8 +49,7 @@ class Driver {
                     if (inputStringTeamID.isEmpty()){
                         System.out.println("input must not be empty!");
                     }
-                    else if (inputStringTeamID.equals(
-                            executeQuery(st, true, "select teamid FROM ling_team where teamid=" + inputStringTeamID + ""))) {
+                    else if (checkTeam(st, inputStringTeamID)) {
                         System.out.println("That teamID # already exists!");
                     }
                     else if (isDigit(inputStringTeamID)) {
@@ -60,8 +59,13 @@ class Driver {
                         showTeams(st);
                     } else
                         System.out.println("Something unexpected happened");
-                } else if (inputString.equalsIgnoreCase("player")) {
-                    showPlayers(st);
+                } else if (inputStringTableName.equalsIgnoreCase("player")) {
+                    showTeams(st);
+                    System.out.println("Type in the team ID# to insert player: ");
+                    String inputStringTeamID = scanner.nextLine();
+                    if (checkTeam(st, inputStringTeamID)){
+                        showPlayers(st, inputStringTeamID);
+                    }
                 }
                 break;
 
@@ -85,6 +89,23 @@ class Driver {
         st.executeQuery("create table ling_player (playerid number NOT NULL, fname varchar2(20) NOT NULL, lname varchar2(20) NOT NULL, position varchar2(20), captainrole varchar2(1), dob date, salary number, teamid number NOT NULL, CONSTRAINT pk_player PRIMARY KEY(playerid, teamid), CONSTRAINT fk_team FOREIGN KEY (teamid) REFERENCES ling_team(teamid))");
         st.executeQuery("insert into ling_team values (100, 'Sharks')");
         st.executeQuery("insert into ling_player values (39, 'Logan', 'Couture', 'Center', 'C', to_date('1989-03-28', 'YYYY-MM-DD'), 2000000, 100)");
+    }
+    
+    // Check team
+    public static boolean checkTeam(Statement st, String teamID) throws Exception{
+        try{
+            ResultSet rs = st.executeQuery("select teamid from ling_team where teamid="+teamID);
+            rs.next();
+            String result = rs.getString(1);
+            if (teamID.equals(result))
+                return true;
+            return false;
+        }
+        catch(Exception e){
+            e.printStackTrace();
+            return false;
+        }
+        
     }
     
     // Add row
@@ -146,9 +167,13 @@ class Driver {
         System.out.println("dropped tables successfully");
     }
     // Show players
+    public static void showPlayers(Statement st, String teamID) throws Exception {
+        executeQuery(st, "select * from ling_player where teamid="+teamID);
+    }
     public static void showPlayers(Statement st) throws Exception {
         executeQuery(st, "select * from ling_player");
     }
+    
     // Show teams
     public static void showTeams(Statement st) throws Exception {
         executeQuery(st, "select * from ling_team");
