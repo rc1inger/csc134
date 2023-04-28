@@ -44,13 +44,26 @@ class Driver {
                if (inputString.equalsIgnoreCase("team")) {
                    showTeams(st);
                    System.out.println("Create a teamID # of the new team: ");
-                   int inputInt = scanner.nextLine();
-                   if (checkValidation(st, "team", inputInt))
+                   inputString = scanner.nextLine();
+                   if ( inputString.isEmpty() )
                    {
-                       System.out.println("Enter new team name: ");
-                       inputString = scanner.nextLine();
-                       //checkValidation(st, "team", inputString);
+                        System.out.println("cannot leave blank.");
                    }
+                   else if ( !isDigit(inputString) )
+                   {
+                        System.out.println("input must be a digit.");
+                   }
+                   else if ( inputString.equals(
+                   executeQuery(st, true, "select teamid FROM ling_team where teamid=" + inputString +"")))
+                   {
+                       System.out.println("That teamID # already exists!");
+                   }
+                   else if ( isDigit(inputString) )
+                   {
+                       System.out.println("Adding team in this query...");
+                   }
+                   else
+                       System.out.println("Something unexpected happened");
                }
 
                if (inputString.equalsIgnoreCase("player")) {
@@ -67,50 +80,6 @@ class Driver {
         }
     } // end main
 
-    // Check string validation
-    public static boolean checkStringValidation(Statement st, String tableName, String inputString) throws Exception
-    {
-        try
-        {
-            number = executeQuery(st, true, "select teamid FROM ling_team where teamid=" + inputString +"");
-        }
-        catch(Exception e)
-        {
-            e.printStackTrace();
-            dropTables(st);
-        }
-    
-      if ( inputString.isEmpty() )
-      {
-           System.out.println("cannot leave blank.");
-           return false;
-      }
-      else if ( !isDigit(inputString) )
-      {
-           System.out.println("input must be a digit.");
-           return false;
-      }
-      else if ( inputString.equals(number) )
-      {
-          System.out.println("That teamID # already exists!");
-          return false;
-      }
-      else if ( isDigit(inputString) )
-      {
-          addRow(st, "ling_team", Integer.parseInt(inputString), "kings");
-          return true;
-      }
-      else
-          System.out.println("Something unexpected happened");
-          return false;
-    }
-    // Add row
-    public static void addRow(Statement st, String tableName, int teamID, String teamName) throws Exception
-    {
-        String query = "insert into " + tableName + " values(" + teamID + ", '" + teamName +"')";
-        st.executeQuery(query);
-    }
-
 
     // Setup db
     public static void setupDB(Statement st) throws Exception{
@@ -120,10 +89,7 @@ class Driver {
         st.executeQuery("insert into ling_player values (39, 'Logan', 'Couture', 'Center', 'C', to_date('1989-03-28', 'YYYY-MM-DD'), 2000000, 100)");
     }
     // Execute query
-    public static void executeQuery(Statement st, String query) throws Exception{
-        
-        try
-        {
+    public static void executeQuery(Statement st,String query) throws Exception{
         ResultSet rs = st.executeQuery(query);
 
         while (rs.next()) {
@@ -139,12 +105,6 @@ class Driver {
             System.out.println();
         }
         System.out.println();
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            dropTables(st);
-        }
     }
     
     // override method to return integer
@@ -157,6 +117,9 @@ class Driver {
         return "0";
     }
 
+    
+    
+    
     
     // Show tables
     public static void showTables(Statement st) throws Exception{
