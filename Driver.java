@@ -36,14 +36,34 @@ class Driver {
         switch (choice) {
             case 1:
                System.out.println(); 
-               System.out.print("Insert Menu: \nFrom which table do you want to insert?");
+               System.out.println("Insert Menu: \nFrom which table do you want to insert?");
                showTables(st);
                System.out.print("Type table_name: ");
                inputString = scanner.nextLine();
 
                if (inputString.equalsIgnoreCase("team")) {
                    showTeams(st);
-                   System.out.println("This executed");
+                   System.out.println("Create a teamID # of the new team: ");
+                   inputString = scanner.nextLine();
+                   if ( inputString.isEmpty() )
+                   {
+                        System.out.println("cannot leave blank.");
+                   }
+                   else if ( !isDigit(inputString) )
+                   {
+                        System.out.println("input must be a digit.");
+                   }
+                   else if ( inputString.equals(
+                   executeQuery(st, true, "select teamid FROM ling_team where teamid=" + inputString +"")))
+                   {
+                       System.out.println("That teamID # already exists!");
+                   }
+                   else if ( isDigit(inputString) )
+                   {
+                       System.out.println("Adding team in this query...");
+                   }
+                   else
+                       System.out.println("Something unexpected happened");
                }
 
                if (inputString.equalsIgnoreCase("player")) {
@@ -87,6 +107,16 @@ class Driver {
         System.out.println();
     }
     
+    // override method to return integer
+    public static String executeQuery(Statement st, boolean bool, String query) throws Exception{
+        ResultSet rs = st.executeQuery(query);
+        if (rs.next())
+        {
+            return rs.getString(1);
+        }
+        return "0";
+    }
+
     
     
     
@@ -104,16 +134,16 @@ class Driver {
         st.executeQuery("drop table ling_team cascade constraints");
         System.out.println("dropped tables successfully");
     }
-    
+    // Show players
     public static void showPlayers(Statement st) throws Exception
     {
         executeQuery(st, "select * from ling_player");
     }
-   public static void showTeams(Statement st) throws Exception
+    // Show teams
+   public static void showTeams(Statement st) throws Exception  
     {
         executeQuery(st, "select * from ling_team");
     }
-    
     // Insert
     public static void showInsertMenu(Statement st)
     {
@@ -134,5 +164,15 @@ class Driver {
     {
     }
 
+    // Helper fn
+    public static boolean isDigit(String s)
+    {
+        for (int i=0; i<s.length(); i++)
+        {
+            if (!Character.isDigit(s.charAt(i)))
+                return false;
+        }
+        return true;
+    }
 
 } // end program
