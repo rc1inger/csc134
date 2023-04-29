@@ -59,13 +59,13 @@ class Driver {
                         showTeams(st);
                     } else
                         System.out.println("Something unexpected happened");
-                } else if (inputStringTableName.equalsIgnoreCase("player")) {
+                }
+                
+                
+                
+                else if (inputStringTableName.equalsIgnoreCase("player")) {
                     showTeams(st);
-                    System.out.println("Type in the team ID# to insert player: ");
-                    String inputStringTeamID = scanner.nextLine();
-                    if (checkTeam(st, inputStringTeamID)){
-                        showPlayers(st, inputStringTeamID);
-                    }
+                    insertPlayer(st);
                 }
                 break;
 
@@ -88,7 +88,56 @@ class Driver {
         st.executeQuery("create table ling_team (teamid number NOT NULL, teamname varchar2(30) NOT NULL, CONSTRAINT pk_team PRIMARY KEY(teamid))");
         st.executeQuery("create table ling_player (playerid number NOT NULL, fname varchar2(20) NOT NULL, lname varchar2(20) NOT NULL, position varchar2(20), captainrole varchar2(1), dob date, salary number, teamid number NOT NULL, CONSTRAINT pk_player PRIMARY KEY(playerid, teamid), CONSTRAINT fk_team FOREIGN KEY (teamid) REFERENCES ling_team(teamid))");
         st.executeQuery("insert into ling_team values (100, 'Sharks')");
-        st.executeQuery("insert into ling_player values (39, 'Logan', 'Couture', 'Center', 'C', to_date('1989-03-28', 'YYYY-MM-DD'), 2000000, 100)");
+        st.executeQuery("insert into ling_player values (39, 'Logan', 'Couture', 'C', 'C', to_date('1989-03-28', 'YYYY-MM-DD'), 2000000, 100)");
+    }
+    
+    // Insert player
+    public static void insertPlayer(Statement st) throws Exception{
+        try {
+           Scanner scanner = new Scanner(System.in);
+           System.out.println("Type in the team ID # to insert player: ");
+           String inputStringTeamID = scanner.nextLine();
+           if (checkTeam(st, inputStringTeamID)){
+               showTeamAndPlayers(st, inputStringTeamID);
+               System.out.print("Player number: ");
+               int playerID = Integer.parseInt(scanner.nextLine());
+               System.out.print("First name: ");
+               String fname = scanner.nextLine();
+               System.out.print("Last name: ");
+               String lname = scanner.nextLine();
+               System.out.print("Position(F/D/G): ");
+               String position = scanner.nextLine();
+               System.out.print("Captain(C/A): ");
+               String captainRole = scanner.nextLine();
+               System.out.print("Date of birth(MM-DD-YYYY): ");
+               String dob = scanner.nextLine();
+               System.out.print("Salary: ");
+               double salary = Double.parseDouble(scanner.nextLine());
+               addRow(st, "ling_player", playerID+",'"+fname+"','"+lname+"','"+position+"','"+captainRole+"',to_date('"+dob+"','MM-DD-YYYY'),"+salary+","+inputStringTeamID);
+               showTeamAndPlayers(st, inputStringTeamID);
+           }
+       }
+       catch (Exception e)
+       {
+           e.printStackTrace();
+       }
+
+    }
+    
+    // Show Team Name and Players
+    public static void showTeamAndPlayers(Statement st, String teamid) throws Exception{
+        try{
+           System.out.println();
+           executeQuerySimple(st, "select teamname from ling_team where teamid="+teamid);
+           System.out.println(" Roster");
+           System.out.println();
+           showPlayers(st, teamid);
+           }
+       catch(Exception e)
+       {
+           e.printStackTrace();
+           dropTables(st);
+       }
     }
     
     // Check team
@@ -135,6 +184,21 @@ class Driver {
             System.out.println();
         }
         System.out.println();
+    }
+    
+    public static void executeQuerySimple(Statement st, String query) throws Exception {
+        ResultSet rs = st.executeQuery(query);
+
+        while (rs.next()) {
+            int numColumns = rs.getMetaData().getColumnCount();
+
+            for (int i = 1; i <= numColumns; i++) {
+                String value = rs.getString(i);
+                if (value != null) {
+                    System.out.print(value);
+                }
+            }
+        }
     }
 
     // override method to return integer
