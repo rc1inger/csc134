@@ -27,46 +27,11 @@ class Driver {
             System.out.println();
             System.out.print("Choose#: ");
             Scanner scanner = new Scanner(System.in);
-
             String inputString = scanner.nextLine();
             int choice = Integer.parseInt(inputString);
-
             switch (choice) {
             case 1:
-                System.out.println();
-                System.out.println("Insert Menu: \nFrom which table do you want to insert?");
-                showTables(st);
-                System.out.print("Type table_name: ");
-                String inputStringTableName = scanner.nextLine();
-
-                /* Does not check for non-digit, does not check if teamname already exists */
-                if (inputStringTableName.equalsIgnoreCase("team")) {
-                    showTeams(st);
-                    System.out.println("Create a teamID # of the new team: ");
-                    String inputStringTeamID = scanner.nextLine();
-                    
-                    
-                    if (inputStringTeamID.isEmpty()){
-                        System.out.println("input must not be empty!");
-                    }
-                    else if (checkTeam(st, inputStringTeamID)) {
-                        System.out.println("That teamID # already exists!");
-                    }
-                    else if (isDigit(inputStringTeamID)) {
-                        System.out.println("What is the team name?");
-                        String inputStringTeamName = scanner.nextLine();
-                        addRow(st, "ling_"+inputStringTableName,""+ inputStringTeamID+", '"+inputStringTeamName+"'");
-                        showTeams(st);
-                    } else
-                        System.out.println("Something unexpected happened");
-                }
-                
-                
-                
-                else if (inputStringTableName.equalsIgnoreCase("player")) {
-                    showTeams(st);
-                    insertPlayer(st);
-                }
+                insertMenu(st);
                 break;
 
             case 2:
@@ -90,108 +55,147 @@ class Driver {
         st.executeQuery("insert into ling_team values (100, 'Sharks')");
         st.executeQuery("insert into ling_player values (39, 'Logan', 'Couture', 'C', 'C', to_date('1989-03-28', 'YYYY-MM-DD'), 2000000, 100)");
     }
-    
-    // Insert player
-    public static void insertPlayer(Statement st) throws Exception{
+
+    // Insert menu
+    public static void insertMenu(Statement st) throws Exception {
         try {
-           Scanner scanner = new Scanner(System.in);
-           System.out.println("Type in the team ID # to insert player: ");
-           String inputStringTeamID = scanner.nextLine();
-           if (checkTeam(st, inputStringTeamID)){
-               showTeamAndPlayers(st, inputStringTeamID);
-               System.out.print("Player number: ");
-               int playerID = Integer.parseInt(scanner.nextLine());
-               System.out.print("First name: ");
-               String fname = scanner.nextLine();
-               System.out.print("Last name: ");
-               String lname = scanner.nextLine();
-               System.out.print("Position(F/D/G): ");
-               String position = scanner.nextLine();
-               System.out.print("Captain(C/A): ");
-               String captainRole = scanner.nextLine();
-               System.out.print("Date of birth(MM-DD-YYYY): ");
-               String dob = scanner.nextLine();
-               System.out.print("Salary: ");
-               double salary = Double.parseDouble(scanner.nextLine());
-               addRow(st, "ling_player", playerID+",'"+fname+"','"+lname+"','"+position+"','"+captainRole+"',to_date('"+dob+"','MM-DD-YYYY'),"+salary+","+inputStringTeamID);
-               showTeamAndPlayers(st, inputStringTeamID);
-           }
-       }
-       catch (Exception e)
-       {
-           e.printStackTrace();
-       }
+            Scanner scanner = new Scanner(System.in);
+            System.out.println();
+            System.out.println("Insert Menu: \nFrom which table do you want to insert?");
+            showTables(st);
+            System.out.print("Type table_name: ");
+            String inputStringTableName = scanner.nextLine();
+
+            /* Does not check for non-digit, does not check if teamname already exists */
+            if (inputStringTableName.equalsIgnoreCase("team")) {
+                showTeams(st);
+                insertTeam(st);
+            } else if (inputStringTableName.equalsIgnoreCase("player")) {
+                showTeams(st);
+                insertPlayer(st);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Insert team
+    public static void insertTeam(Statement st) throws Exception {
+        try {
+            Scanner scanner = new Scanner(System.in);
+            System.out.println("Create a teamID # of the new team: ");
+            String inputStringTeamID = scanner.nextLine();
+
+            if (inputStringTeamID.isEmpty()) {
+                System.out.println("input must not be empty!");
+            } else if (checkTeam(st, inputStringTeamID)) {
+                System.out.println("That teamID # already exists!");
+            } else if (isDigit(inputStringTeamID)) {
+                System.out.println("What is the team name?");
+                String inputStringTeamName = scanner.nextLine();
+                st.executeQuery("insert into ling_team values(" + inputStringTeamID + ",'" + inputStringTeamName + "')"); // not using addRow
+                showTeams(st);
+            } else
+                System.out.println("Something unexpected happened");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
     }
-    
-    // Show Team Name and Players
-    public static void showTeamAndPlayers(Statement st, String teamid) throws Exception{
-        try{
-           System.out.println();
-           executeQuerySimple(st, "select teamname from ling_team where teamid="+teamid);
-           System.out.println(" Roster");
-           System.out.println();
-           showPlayers(st, teamid);
-           }
-       catch(Exception e)
-       {
-           e.printStackTrace();
-           dropTables(st);
-       }
+
+    // Insert player
+    public static void insertPlayer(Statement st) throws Exception {
+        try {
+            Scanner scanner = new Scanner(System.in);
+            System.out.println("Type in the team ID # to insert player: ");
+            String inputStringTeamID = scanner.nextLine();
+            if (!checkTeam(st, inputStringTeamID)) {
+                System.out.println("Team id # doesn't exist.");
+                System.out.println("Do you want to create a new team?: ");
+            } else {
+                showTeamAndPlayers(st, inputStringTeamID);
+                System.out.print("Player number: ");
+                int playerID = Integer.parseInt(scanner.nextLine());
+                System.out.print("First name: ");
+                String fname = scanner.nextLine();
+                System.out.print("Last name: ");
+                String lname = scanner.nextLine();
+                System.out.print("Position(F/D/G): ");
+                String position = scanner.nextLine();
+                System.out.print("Captain(C/A): ");
+                String captainRole = scanner.nextLine();
+                System.out.print("Date of birth(MM-DD-YYYY): ");
+                String dob = scanner.nextLine();
+                System.out.print("Salary: ");
+                double salary = Double.parseDouble(scanner.nextLine());
+                addRow(st, "ling_player", playerID + ",'" + fname + "','" + lname + "','" + position + "','" + captainRole + "',to_date('" + dob + "','MM-DD-YYYY')," + salary + "," + inputStringTeamID);
+                showTeamAndPlayers(st, inputStringTeamID);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
-    
+
+    // Show Team Name and Players
+    public static void showTeamAndPlayers(Statement st, String teamid) throws Exception {
+        try {
+            System.out.println();
+            executeQuerySimple(st, "select teamname from ling_team where teamid=" + teamid);
+            System.out.println(" Roster");
+            System.out.println();
+            executeQuery(st, "select column_name from user_tab_columns where lower(table_name)='ling_player'");
+            showPlayers(st, teamid);
+        } catch (Exception e) {
+            e.printStackTrace();
+            dropTables(st);
+        }
+    }
+
     // Check team
-    public static boolean checkTeam(Statement st, String teamID) throws Exception{
-        try{
-            ResultSet rs = st.executeQuery("select teamid from ling_team where teamid="+teamID);
+    public static boolean checkTeam(Statement st, String teamID) throws Exception {
+        try {
+            ResultSet rs = st.executeQuery("select teamid from ling_team where teamid=" + teamID);
             rs.next();
             String result = rs.getString(1);
             if (teamID.equals(result))
                 return true;
             return false;
-        }
-        catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
-        
+
     }
-    
+
     // Add row
-    public static void addRow(Statement st, String table_name, String values) throws Exception{
+    public static void addRow(Statement st, String table_name, String values) throws Exception {
         try {
-                st.executeQuery("insert into "+table_name+" values("+values+")");
-        }
-        catch (Exception e){
+            st.executeQuery("insert into " + table_name + " values(" + values + ")");
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
-    
+
     // Execute query
     public static void executeQuery(Statement st, String query) throws Exception {
         ResultSet rs = st.executeQuery(query);
-
         while (rs.next()) {
             int numColumns = rs.getMetaData().getColumnCount();
-
             for (int i = 1; i <= numColumns; i++) {
                 String value = rs.getString(i);
                 if (value != null) {
                     System.out.print("| " + value + "\t");
                 }
             }
-
             System.out.println();
         }
         System.out.println();
     }
-    
     public static void executeQuerySimple(Statement st, String query) throws Exception {
         ResultSet rs = st.executeQuery(query);
-
         while (rs.next()) {
             int numColumns = rs.getMetaData().getColumnCount();
-
             for (int i = 1; i <= numColumns; i++) {
                 String value = rs.getString(i);
                 if (value != null) {
@@ -204,15 +208,12 @@ class Driver {
     // override method to return integer
     public static String executeQuery(Statement st, boolean bool, String query) throws Exception {
         ResultSet rs = st.executeQuery(query);
-        try
-        {
+        try {
             if (rs.next()) {
                 return rs.getString(1);
             }
             return "0";
-        }
-        catch(Exception e)
-        {
+        } catch (Exception e) {
             e.printStackTrace();
             System.out.println("input must be a digit.");
         }
@@ -232,12 +233,12 @@ class Driver {
     }
     // Show players
     public static void showPlayers(Statement st, String teamID) throws Exception {
-        executeQuery(st, "select * from ling_player where teamid="+teamID);
+        executeQuery(st, "select * from ling_player where teamid=" + teamID);
     }
     public static void showPlayers(Statement st) throws Exception {
         executeQuery(st, "select * from ling_player");
     }
-    
+
     // Show teams
     public static void showTeams(Statement st) throws Exception {
         executeQuery(st, "select * from ling_team");
@@ -254,11 +255,9 @@ class Driver {
     // View
     public static void showViewMenu(Statement st) {}
 
-        // Helper fn
-    public static boolean isDigit(String s)
-    {
-        for (int i=0; i<s.length(); i++)
-        {
+    // Helper fn
+    public static boolean isDigit(String s) {
+        for (int i = 0; i < s.length(); i++) {
             if (!Character.isDigit(s.charAt(i)))
                 return false;
         }
