@@ -9,38 +9,44 @@ class Driver {
         Connection con = DriverManager.getConnection(
             "jdbc:oracle:thin:@sabzevi2.homeip.net:1521:orcl", "csus", "student");
         Statement st = con.createStatement();
+        boolean exit=false;
+        setupDB(st);
         try {
-            setupDB(st);
-            // Menu Array
-            String[] menu = {
-                "Insert",
-                "Delete",
-                "Update",
-                "View",
-                "Quit"
-            };
+            do {
+                // Menu Array
+                String[] menu = {
+                    "Insert",
+                    "Delete",
+                    "Update",
+                    "View",
+                    "Quit"
+                };
 
-            for (int i = 0; i < menu.length; i++) {
-                System.out.println(i + 1 + ")\t\t" + menu[i]);
+                for (int i = 0; i < menu.length; i++) {
+                    System.out.println(i + 1 + ")\t\t" + menu[i]);
+                }
+
+                System.out.println();
+                System.out.print("Choose#: ");
+                Scanner scanner = new Scanner(System.in);
+                String inputString = scanner.nextLine();
+                int choice = Integer.parseInt(inputString);
+                switch (choice) {
+                case 1:
+                    insertMenu(st);
+                    break;
+
+                case 2:
+                    System.out.println("");
+                    break;
+                case 5:
+                    exit=true;    
+
+                default:
+                    break;
+                }
             }
-
-            System.out.println();
-            System.out.print("Choose#: ");
-            Scanner scanner = new Scanner(System.in);
-            String inputString = scanner.nextLine();
-            int choice = Integer.parseInt(inputString);
-            switch (choice) {
-            case 1:
-                insertMenu(st);
-                break;
-
-            case 2:
-                System.out.println("");
-                break;
-
-            default:
-                break;
-            }
+            while (!exit);
             dropTables(st); // exit code 0
         } catch (SQLException e) {
             e.printStackTrace();
@@ -111,8 +117,14 @@ class Driver {
             String inputStringTeamID = scanner.nextLine();
             if (!checkTeam(st, inputStringTeamID)) {
                 System.out.println("Team id # doesn't exist.");
-                System.out.println("Do you want to create a new team?: ");
-            } else {
+                System.out.println("Do you want to create a new team? (y/n): ");
+                String choice = scanner.nextLine();
+                if (choice.equalsIgnoreCase("n"))
+                    System.exit(0);
+                else
+                    insertTeam(st);
+            }
+            if (checkTeam(st, inputStringTeamID)) {
                 showTeamAndPlayers(st, inputStringTeamID);
                 System.out.print("Player number: ");
                 int playerID = Integer.parseInt(scanner.nextLine());
