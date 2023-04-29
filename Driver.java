@@ -59,7 +59,7 @@ class Driver {
     // Setup db
     public static void setupDB(Statement st) throws Exception {
         st.executeQuery("create table ling_team (teamid number NOT NULL, teamname varchar2(30) NOT NULL, CONSTRAINT pk_team PRIMARY KEY(teamid))");
-        st.executeQuery("create table ling_player (playerid number NOT NULL, fname varchar2(20) NOT NULL, lname varchar2(20) NOT NULL, position varchar2(20), captainrole varchar2(1), dob date, salary number, teamid number NOT NULL, CONSTRAINT pk_player PRIMARY KEY(playerid, teamid), CONSTRAINT fk_team FOREIGN KEY (teamid) REFERENCES ling_team(teamid))");
+        st.executeQuery("create table ling_player (playerid number NOT NULL, fname varchar2(20) NOT NULL, lname varchar2(20) NOT NULL, position varchar2(20), captainrole varchar2(1), dob date, salary number, teamid number NOT NULL, CONSTRAINT pk_player PRIMARY KEY(playerid, teamid), CONSTRAINT fk_player_team FOREIGN KEY (teamid) REFERENCES ling_team(teamid) ON DELETE CASCADE)");
         st.executeQuery("insert into ling_team values (100, 'Sharks')");
         st.executeQuery("insert into ling_player values (39, 'Logan', 'Couture', 'C', 'C', to_date('1989-03-28', 'YYYY-MM-DD'), 2000000, 100)");
     }
@@ -93,7 +93,13 @@ class Driver {
                 
                 if (checkPlayer(st, inputStringPlayerID) && deleteConfirm == 'y')
                 {
-                    showTeams(st);
+                    st.executeUpdate("delete from ling_player where teamid="+inputStringTeamID+" AND playerid="+inputStringPlayerID);
+                    
+                    if (executeQuery(st, true, "select count(*) from ling_player where teamid="+inputStringTeamID).equals("0")) {
+                        System.out.println("No players. Deleting the team too.");
+                        st.executeUpdate("delete from ling_team where teamid="+inputStringTeamID);
+                    }
+                    showPlayers(st);
                     System.out.println("Successfully deleted |"+inputStringPlayerID+" |\n");
                 }
                 else{
@@ -173,7 +179,7 @@ class Driver {
                 System.out.println("Do you want to create a new team? (y/n): ");
                 String choice = scanner.nextLine();
                 if (choice.equalsIgnoreCase("n"))
-                    System.exit(0);
+                    return;
                 else
                     insertTeam(st);
             }
@@ -230,7 +236,7 @@ class Driver {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
+        return false;
     }
     
     // Check player
